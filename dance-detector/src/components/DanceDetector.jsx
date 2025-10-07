@@ -56,6 +56,10 @@ const DanceDetector = () => {
         
         if (motion > MOTION_THRESHOLD) {
           setIsMotionDetected(true);
+          // Restore normal playback speed and pitch
+          if (audioRef.current) {
+            audioRef.current.playbackRate = 1.0;
+          }
           // Clear any existing timeout
           if (motionTimeoutRef.current) {
             clearTimeout(motionTimeoutRef.current);
@@ -63,6 +67,10 @@ const DanceDetector = () => {
           // Set new timeout for 1 second of no motion
           motionTimeoutRef.current = setTimeout(() => {
             setIsMotionDetected(false);
+            // Dramatically slow down music and lower pitch when not dancing
+            if (audioRef.current) {
+              audioRef.current.playbackRate = 0.3;
+            }
           }, 1000);
         }
       }
@@ -115,13 +123,18 @@ const DanceDetector = () => {
 
   const startMusic = () => {
     if (audioRef.current) {
+      console.log('Attempting to play music...');
       audioRef.current.play()
         .then(() => {
+          console.log('Music started successfully!');
           setMusicStarted(true);
         })
         .catch(error => {
           console.error('Error playing audio:', error);
+          alert('Unable to play music. Error: ' + error.message);
         });
+    } else {
+      console.error('Audio element not found');
     }
   };
 
